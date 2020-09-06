@@ -6,7 +6,7 @@ import (
         "os"
         "time"
         "encoding/gob"
-        "bytes"
+        "bufio"
 )
 
 //Declare Message Struct as per described in instructions
@@ -15,7 +15,7 @@ type Message struct {
         Receiver string
         Title string
         Content string
-        Date time.Time
+        Time time.Time
 }
 
 func main() {
@@ -24,6 +24,8 @@ func main() {
 	var receiver string
         var title string
         var content string
+
+        reader := bufio.NewReader(os.Stdin)
 
         //Scan user input for host:port
         arguments := os.Args
@@ -41,27 +43,28 @@ func main() {
         }
         
         //scan user input for message contents
-	fmt.Print("Sender(Email): ")
-	fmt.Scanln(&sender)
-	fmt.Print("Receiver: ")
-	fmt.Scanln(&receiver)
-	fmt.Print("Title: ")
-        fmt.Scanln(&title)
+        fmt.Print("Sender(Email): ")
+        sender, _ = reader.ReadString('\n')
+	// fmt.Scanln(&sender)
+        fmt.Print("Receiver: ")
+        receiver, _ = reader.ReadString('\n')
+	// fmt.Scanln(&receiver)
+        fmt.Print("Title: ")
+        title, _ = reader.ReadString('\n')
+        // fmt.Scanln(&title)
         fmt.Print("Message content: ")
-        fmt.Scanln(&content)
+        content, _ = reader.ReadString('\n')
+        // fmt.Scanln(&content)
         t := time.Now()
 
-        //Initialize message struct
+        //create a gob encoder and code the message struct
+        encoder := gob.NewEncoder(c)
         msg := Message{sender, receiver, title, content, t}
-        bin_buf := new(bytes.Buffer)
+        encoder.Encode(msg)
 
-        //Initialize a gob encoder object
-        gobobj := gob.NewEncoder(bin_buf)
-
-        //Send struct Message using gobobj
-        gobobj.Encode(msg)
-
-        //Send encoded struct via bytes over connection to the TCP server
-        c.Write(bin_buf.Bytes())
+        //Wait for ACK and then close connection and exit
+        for {
+               return
+        }
       
 }

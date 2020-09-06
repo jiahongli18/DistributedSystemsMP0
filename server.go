@@ -6,7 +6,6 @@ import (
         "os"
         "time"
         "encoding/gob"
-        "bytes"
 )
 
 //Declare Message Struct as per described in instructions
@@ -15,7 +14,7 @@ type Message struct {
         Receiver string
         Title string
         Content string
-        Date time.Time
+        Time time.Time
 }
 
 func main() {
@@ -36,29 +35,23 @@ func main() {
                 fmt.Println("Listening on port" + PORT)
         }
         defer l.Close()
-
-        c, err := l.Accept()
-        if err != nil {
-                fmt.Println(err)
-                return
-        }
-
-        //Make a temporary buffer
-        tmp := make([]byte, 500)
-
+  
         for {
-                //Read buffer from connection
-                _, err = c.Read(tmp)
-                tmpbuff := bytes.NewBuffer(tmp)
-                tmpstruct := new(Message)
+                c, err := l.Accept()
+                if err != nil {
+                        fmt.Println(err)
+                        return
+                }
+                decoder := gob.NewDecoder(c) //intialize gob decoder
 
-                //Decode buffer
-                gobobj := gob.NewDecoder(tmpbuff)
+                //Decode message struct and print it
+                message := new(Message)
+                decoder.Decode(message)
+                fmt.Printf("Sender : %+v \nReceiver : %+v \nTitle : %+v \nContent : %+v \nTime : %+v", message.Sender, message.Receiver, message.Title, message.Content, message.Time);
+                
+                //Send ACK to client and then exit
 
-                //Decode and print struct
-                gobobj.Decode(tmpstruct)
-                fmt.Println(tmpstruct)
-            
-        }
+                return      
+            }
 
 }
