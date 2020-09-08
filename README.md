@@ -35,9 +35,10 @@ Message content: hi
         Time time.Time
   }
 ```
-There is a struct named Messages that conforms to the style described in the MP0 instructions.
+There is a struct named Message that conforms to the style described in the MP0 instructions.
 
 ### Processes
+Process A is in client.go and Process B is in server.go.
 
 The flow of our code starts from ```server.go``` and utilizes the a go library called ```net``` in order to start a server that listens on incoming requests. 
 
@@ -45,7 +46,11 @@ Once the server is active, we once again use the ```net``` library in ```client.
 
 Next, after the user inputs the message they want to send, we use ```gob```, another go library in order to encode the message. It is necessary to serialise the struct because sending it between a client and a server. Messages are sent as bytes that have no structure, thus we need to encode/decode it someway.
 
-Next, the server receives the encoded message, and decodes using the ```gob``` library once again.
+Next, the server receives the encoded message, decodes using the ```gob``` library once again, and prints out the message it decodes on the screen.
+
+Then, to signify the acknowledgement, the server encodes a string "Ack" inside a struct named AckB, sends it to the client on the TCP channel, and exit.
+
+Finally, the client waits and decodes the string message sent from the server inside a struct named AckA. The client will not successfully exit the program unless the string it receives is equal to "Ack".  
 
 ## Resources
 
